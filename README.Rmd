@@ -25,10 +25,13 @@ The goal of ssrhom is to analyze data from single subject designs using hierarch
 
 ## Installation
 
-You can install the development version of ssrhom like so:
+You can install ssrhom from [R-universe](https://r-universe.dev/) with:
 
-``` r
-remotes::install_github("jamesuanhoro/ssrhom")
+```{r eval = FALSE}
+install.packages(
+  "ssrhom",
+  repos = c("https://jamesuanhoro.r-universe.dev", "https://cloud.r-project.org")
+)
 ```
 
 ## Simple demonstration
