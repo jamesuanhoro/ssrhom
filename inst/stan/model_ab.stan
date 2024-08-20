@@ -262,15 +262,16 @@ generated quantities {
     }
   }
 
+  hps_dstat = sum(coefs[, 2]) / sqrt(
+    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
+  );
+
   if (increase == 0) {
     mean_diff = -mean_diff;
     median_diff = -median_diff;
     nap = 1.0 - nap;
     tau = -tau;
     pem = 1.0 - pem;
+    hps_dstat = -hps_dstat;
   }
-
-  hps_dstat = sum(mean_diff) / sqrt(
-    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
-  );
 }
