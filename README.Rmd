@@ -21,12 +21,34 @@ knitr::opts_chunk$set(
 [![R-universe badge](https://jamesuanhoro.r-universe.dev/badges/ssrhom)](https://jamesuanhoro.r-universe.dev/ssrhom)
 <!-- badges: end -->
 
-The goal of ssrhom is to ...
+The goal of ssrhom is to analyze data from single subject designs using hierarchical ordinal regression models.
 
 ## Installation
 
 You can install the development version of ssrhom like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("jamesuanhoro/ssrhom")
+```
+
+## Simple demonstration
+
+Using the tasky dataset which comes with the package:
+
+```{r}
+library(ssrhom)
+head(tasky)
+# all arguments below are required
+tasky_model <- ssrhom_model_ab(
+  data = tasky,
+  grouping = "phase", condition = "B",
+  time = "time", outcome = "count", case = "person",
+  seed = 12345
+)
+# for a list of available effect sizes:
+ssrhom_list_stats()
+# non-overlap of all pairs
+ssrhom_get_effect(tasky_model, stat = "nap")
+# within subject standardized mean difference using pooled SD
+ssrhom_get_effect(tasky_model, stat = "smd_p")
 ```
