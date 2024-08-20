@@ -165,6 +165,7 @@ create_dat_list <- function(dt, increase = TRUE) {
   dl <- list(
     n = nrow(dt), # number of rows of data
     n_case = max(dt$case_id), # number of cases
+    case_label = levels(dt$case_label), # case labels
     n_time = max(dt$time_id), # maximum number of timepoints
     case_id = dt$case_id, # case ID variable (integers)
     time_id = dt$time_id, # time variable (can be continuous)
