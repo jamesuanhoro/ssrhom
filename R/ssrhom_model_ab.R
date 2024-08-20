@@ -26,6 +26,16 @@
 #' if FALSE, hide messages.
 #'
 #' @return Object containing analysis results.
+#'
+#' @examples
+#' \dontrun{
+#' tasky_model <- ssrhom_model_ab(
+#'   data = tasky,
+#'   grouping = "phase", condition = "B",
+#'   time = "time", outcome = "count"
+#' )
+#' ssrhom_get_effect(tasky_model, stat = "nap")
+#' }
 #' @export
 ssrhom_model_ab <- function(
     data,

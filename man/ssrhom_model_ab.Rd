@@ -70,3 +70,13 @@ Object containing analysis results.
 \description{
 Analyze AB design
 }
+\examples{
+\dontrun{
+tasky_model <- ssrhom_model_ab(
+  data = tasky,
+  grouping = "phase", condition = "B",
+  time = "time", outcome = "count"
+)
+ssrhom_get_effect(tasky_model, stat = "nap")
+}
+}
