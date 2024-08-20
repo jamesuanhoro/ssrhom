@@ -159,7 +159,6 @@ generic_numeric_checks <- function(dt, outcome) {
 #' @return Data list object for Stan
 #' @param dt Modified form of original data
 #' @inheritParams ssrhom_model_ab
-#' @import data.table
 #' @keywords internal
 create_dat_list <- function(dt, increase = TRUE) {
   dl <- list(
@@ -178,13 +177,13 @@ create_dat_list <- function(dt, increase = TRUE) {
   # number of unique values
   dl$n_ord <- length(dl$count_levs)
 
-  case_label <- case_id <- treat <- x <- NULL
-  (gm_count <- data.table::as.data.table(dt)[
-    , .N, list(case_label, case_id, x = treat + 1) # nolint
-  ][order(case_id, x)])
+  gm_count <- stats::aggregate(
+    out ~ case_id + treat, dt, length
+  )
+  gm_count <- gm_count[order(gm_count$case_id, gm_count$treat), ]
 
   dl$n_count <- nrow(gm_count) # number of case-phases
-  dl$count <- gm_count$N # number of data points computed in gm_count
+  dl$count <- gm_count$out # number of data points computed in gm_count
   dl$increase <- as.integer(!isFALSE(increase))
   return(dl)
 }
@@ -224,4 +223,45 @@ is_positive_whole_number <- function(input) {
   if (input <= 0) {
     stop()
   }
+}
+
+#' Function to list out effects computed by package.
+#'
+#' @param table If TRUE, report statistics in a table describing
+#' each statistic.
+#' If FALSE, simply return statistics as a list.
+#' @export
+ssrhom_list_stats <- function(table = TRUE) {
+  stats <- c(
+    "mean", "median",
+    "mean-diff", "median-diff",
+    "log-mean-ratio",
+    "nap", "tau", "pem", "smd_c", "smd_p"
+  )
+  if (isFALSE(table)) {
+    return(stats)
+  }
+  stats_exp <- c(
+    "mean of each case in both phases",
+    "median of each case in both phases",
+    "mean difference between phases by case",
+    "median difference between phases by case",
+    "log-ratio of means by case",
+    "non-overlap of all pairs by case",
+    "A linear transformation of NAP",
+    "Proportion of treatment cases exceeding control cases by case",
+    "Standardized mean difference using control SD as standardizer by case",
+    "Standardized mean difference using pooled SD as standardizer by case"
+  )
+  pad_str <- function(str) {
+    str_len <- length(strsplit(str, "")[[1]])
+    rem_len <- 20 - str_len
+    return(paste0(str, paste0(rep(" ", rem_len), collapse = "")))
+  }
+  stats_pad <- sapply(stats, pad_str)
+  desc_txt <- c(
+    paste0(stats_pad, ":\t", stats_exp),
+    "\nIf model was called with `increase = FALSE`, then effects are reversed."
+  )
+  return(writeLines(desc_txt))
 }

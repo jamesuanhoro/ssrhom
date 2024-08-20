@@ -142,15 +142,15 @@ generated quantities {
   vector[n_case] mean_diff;
   vector[n_case] median_diff;
   vector[n_case] log_mean_ratio;
-  vector[n_case] log_median_ratio;
   vector[n_case] nap;
   vector[n_case] tau;
   vector[n_case] pem;
+  vector[n_case] smd_c;
+  vector[n_case] smd_p;
   vector[n] y_hat;
   vector[n] y_sim;
   // vector[n] log_lik;
   array[n] int ord_sim;
-  real hps_dstat;
 
   coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
   coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
@@ -243,7 +243,11 @@ generated quantities {
       mean_diff[i] = mean_s[i, 2] - mean_s[i, 1];
       median_diff[i] = median_s[i, 2] - median_s[i, 1];
       log_mean_ratio[i] = log(mean_s[i, 2]) - log(mean_s[i, 1]);
-      log_median_ratio[i] = log(median_s[i, 2]) - log(median_s[i, 1]);
+      smd_c[i] = mean_diff[i] / sqrt(var_s[i, 1]);
+      smd_p[i] = mean_diff[i] / sqrt((
+        (count[col_id - 1] - 1) * var_s[i, 1] +
+          (count[col_id] - 1) * var_s[i, 2]
+      ) / (count[col_id - 1] + count[col_id] - 2));
       d0_vec = pmf_mat[, col_id - 1];
       d1_vec = pmf_mat[, col_id];
       ccd1_vec = 1.0 - cumulative_sum(d1_vec);
@@ -262,16 +266,14 @@ generated quantities {
     }
   }
 
-  hps_dstat = sum(coefs[, 2]) / sqrt(
-    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
-  );
-
   if (increase == 0) {
     mean_diff = -mean_diff;
     median_diff = -median_diff;
+    log_mean_ratio = -log_mean_ratio;
     nap = 1.0 - nap;
     tau = -tau;
     pem = 1.0 - pem;
-    hps_dstat = -hps_dstat;
+    smd_c = -smd_c;
+    smd_p = -smd_p;
   }
 }

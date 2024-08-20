@@ -3,8 +3,8 @@
 #' @param res_obj Object returned by main function
 #' @param stat One of "mean", "median",
 #' "mean-diff", "median-diff",
-#' "log-mean-ratio", "log-median-ratio",
-#' "nap", "tau", "pem", or "hps_d"
+#' "log-mean-ratio",
+#' "nap", "tau", "pem", "smd_c", or "smd_p"
 #' @param interval Some quantile interval between 0 and 1
 #' @param return_draws If TRUE, do not summarize the posterior samples.
 #' If FALSE, summarize the posterior samples.
@@ -12,17 +12,12 @@
 #' @export
 ssrhom_get_effect <- function(
     res_obj, stat = "nap", interval = .95, return_draws = FALSE) {
-  stat_list <- c(
-    "mean", "median",
-    "mean-diff", "median-diff",
-    "log-mean-ratio", "log-median-ratio",
-    "nap", "tau", "pem", "hps_d"
-  )
+  stat_list <- ssrhom_list_stats(table = FALSE)
   stat_list_real <- c(
     "mean_s", "median_s",
     "mean_diff", "median_diff",
-    "log_mean_ratio", "log_median_ratio",
-    "nap", "tau", "pem", "hps_dstat"
+    "log_mean_ratio",
+    "nap", "tau", "pem", "smd_c", "smd_p"
   )
 
   if (!(stat %in% stat_list)) {
@@ -62,7 +57,7 @@ ssrhom_get_effect <- function(
         c("Control", "Treatment")[which_pos], "]"
       )
     })
-  } else if (stat %in% stat_list[3:9]) {
+  } else if (stat %in% stat_list[3:10]) {
     case_id <- as.integer(
       regmatches(var_names, regexpr("\\d+", var_names))
     )
@@ -71,8 +66,6 @@ ssrhom_get_effect <- function(
       name <- var_names_split[[i]]
       paste0(stat, "[", case_label[case_id[i]], name[2])
     })
-  } else if (stat %in% stat_list[10]) {
-    new_var_names <- stat
   }
   colnames(stat_post) <- new_var_names
 

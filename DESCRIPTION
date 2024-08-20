@@ -1,10 +1,11 @@
 Package: ssrhom
-Title: What the Package Does (One Line, Title Case)
+Title: Hierarchical ordinal models for analyzing single subject designs
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("James", "Uanhoro", , "James.Uanhoro@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4843-927X"))
+Description: Hierarchical ordinal models for analyzing single subject
+    designs using Bayesian models fit with Stan.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -13,7 +14,6 @@ Biarch: true
 Depends: 
     R (>= 3.4.0)
 Imports: 
-    data.table,
     methods,
     posterior,
     Rcpp (>= 0.12.0),
