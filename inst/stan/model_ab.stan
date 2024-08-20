@@ -32,6 +32,7 @@ transformed data {
   array[n_case, n_time] int outcome_ord = rep_array(0, n_case, n_time);
   array[n_case, n_time] int treat_arr = rep_array(0, n_case, n_time);
   array[n_case, n_time] int idx_01 = rep_array(0, n_case, n_time);
+  real treat_var = mean(treat) * (1 - mean(treat));
 
   for (i in 1:n) {
     outcome_ord[case_id[i], time_id[i]] = y_ord[i];
@@ -149,7 +150,9 @@ generated quantities {
   vector[n] y_sim;
   // vector[n] log_lik;
   array[n] int ord_sim;
-  real hps_dstat;
+  real hps_dstat = treat_eff / sqrt(
+    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
+  );
 
   coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
   coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
@@ -267,11 +270,5 @@ generated quantities {
     nap = 1.0 - nap;
     tau = -tau;
     pem = 1.0 - pem;
-  }
-
-  {
-    real denominator = 1.0;
-
-    hps_dstat = mean(mean_diff) / denominator;
   }
 }

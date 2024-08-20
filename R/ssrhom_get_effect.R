@@ -16,13 +16,13 @@ ssrhom_get_effect <- function(
     "mean", "median",
     "mean-diff", "median-diff",
     "log-mean-ratio", "log-median-ratio",
-    "nap", "tau", "pem"
+    "nap", "tau", "pem", "hps_d"
   )
   stat_list_real <- c(
     "mean_s", "median_s",
     "mean_diff", "median_diff",
     "log_mean_ratio", "log_median_ratio",
-    "nap", "tau", "pem"
+    "nap", "tau", "pem", "hps_dstat"
   )
 
   if (!(stat %in% stat_list)) {
@@ -48,8 +48,9 @@ ssrhom_get_effect <- function(
   stat_post <- as.data.frame(res_obj$model, stat_real)
 
   var_names <- colnames(stat_post)
+  new_var_names <- var_names
   case_label <- res_obj$stan_data_list$case_label
-  if (stat %in% c("mean", "median")) {
+  if (stat %in% stat_list[1:2]) {
     case_id <- as.integer(
       gsub(",", "", regmatches(var_names, regexpr("\\d+,", var_names)))
     )
@@ -62,7 +63,7 @@ ssrhom_get_effect <- function(
         c("Control", "Treatment")[which_pos], "]"
       )
     })
-  } else {
+  } else if (stat %in% stat_list[3:9]) {
     case_id <- as.integer(
       regmatches(var_names, regexpr("\\d+", var_names))
     )
