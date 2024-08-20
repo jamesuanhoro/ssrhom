@@ -1,3 +1,4 @@
 # ssrhom (development version)
 
-* Initial package.
+* Analysis and effect sizes for AB designs
+* Tests implemented
