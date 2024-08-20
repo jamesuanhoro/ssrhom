@@ -38,12 +38,11 @@ Using the tasky dataset which comes with the package:
 ```{r}
 library(ssrhom)
 head(tasky)
-# all arguments below are required
+# all arguments below are required for a given dataset
 tasky_model <- ssrhom_model_ab(
   data = tasky,
   grouping = "phase", condition = "B",
-  time = "time", outcome = "count", case = "person",
-  seed = 12345
+  time = "time", outcome = "count", case = "person"
 )
 # for a list of available effect sizes:
 ssrhom_list_stats()

@@ -40,20 +40,16 @@ head(tasky)
 ```
 
 ``` r
-# all arguments below are required
+# all arguments below are required for a given dataset
 tasky_model <- ssrhom_model_ab(
   data = tasky,
   grouping = "phase", condition = "B",
-  time = "time", outcome = "count", case = "person",
-  seed = 12345
+  time = "time", outcome = "count", case = "person"
 )
-#> Warning: There were 9 divergent transitions after warmup. See
+#> Warning: There were 13 divergent transitions after warmup. See
 #> https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 #> to find out why this is a problem and how to eliminate them.
 #> Warning: Examine the pairs() plot to diagnose sampling problems
-#> Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
-#> Running the chains for more iterations may help. See
-#> https://mc-stan.org/misc/warnings.html#bulk-ess
 ```
 
 ``` r
@@ -79,18 +75,18 @@ ssrhom_get_effect(tasky_model, stat = "nap")
 #> # A tibble: 3 × 8
 #>   variable       mean     sd  q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>         <dbl>  <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 nap[amber]    0.903 0.0422 0.802 0.964  1.00    1960.    1945.
-#> 2 nap[cara]     0.663 0.0917 0.472 0.829  1.00    2614.    1836.
-#> 3 nap[rebeccah] 0.910 0.0456 0.803 0.978  1.00    1791.    1844.
+#> 1 nap[amber]    0.905 0.0395 0.810 0.964  1.00    2065.    1853.
+#> 2 nap[cara]     0.660 0.0918 0.467 0.828  1.00    2684.    1802.
+#> 3 nap[rebeccah] 0.910 0.0452 0.801 0.976  1.00    1524.    1906.
 ```
 
 ``` r
 # within subject standardized mean difference using pooled SD
 ssrhom_get_effect(tasky_model, stat = "smd_p")
 #> # A tibble: 3 × 8
-#>   variable         mean    sd    q2.5 q97.5  rhat ess_bulk ess_tail
-#>   <chr>           <dbl> <dbl>   <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 smd_p[amber]    1.88  0.345  1.21    2.57  1.00    2235.    1998.
-#> 2 smd_p[cara]     0.626 0.386 -0.0966  1.41  1.00    2612.    1835.
-#> 3 smd_p[rebeccah] 2.12  0.518  1.25    3.29  1.00    1825.    1737.
+#>   variable         mean    sd   q2.5 q97.5  rhat ess_bulk ess_tail
+#>   <chr>           <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl>
+#> 1 smd_p[amber]    1.90  0.339  1.27   2.61  1.00    1917.    1947.
+#> 2 smd_p[cara]     0.614 0.383 -0.117  1.41  1.00    2678.    1857.
+#> 3 smd_p[rebeccah] 2.12  0.499  1.24   3.22  1.00    1538.    1954.
 ```
