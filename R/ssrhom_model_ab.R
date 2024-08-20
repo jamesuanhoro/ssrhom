@@ -32,7 +32,7 @@
 #' tasky_model <- ssrhom_model_ab(
 #'   data = tasky,
 #'   grouping = "phase", condition = "B",
-#'   time = "time", outcome = "count"
+#'   time = "time", outcome = "count", case = "person"
 #' )
 #' ssrhom_get_effect(tasky_model, stat = "nap")
 #' }

@@ -128,14 +128,14 @@ generic_numeric_checks <- function(dt, outcome) {
     outcome_dt <- stats::na.omit(as.numeric(dt[, 2])),
     warning = function(e) {
       statement <- paste(
-        "Check that the `outcome` variable contains numbers.",
+        "Check that the `outcome` variable contains only numbers.",
         sep = " "
       )
       stop(statement)
     },
     error = function(e) {
       statement <- paste(
-        "Check that the `outcome` variable contains numbers.",
+        "Check that the `outcome` variable contains only numbers.",
         sep = " "
       )
       stop(statement)
