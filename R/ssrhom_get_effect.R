@@ -4,7 +4,7 @@
 #' @param stat One of "mean", "median",
 #' "mean-diff", "median-diff",
 #' "log-mean-ratio", "log-median-ratio",
-#' "nap", "tau", or "pem"
+#' "nap", "tau", "pem", or "hps_d"
 #' @param interval Some quantile interval between 0 and 1
 #' @param return_draws If TRUE, do not summarize the posterior samples.
 #' If FALSE, summarize the posterior samples.

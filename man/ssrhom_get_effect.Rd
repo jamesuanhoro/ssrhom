@@ -12,7 +12,7 @@ ssrhom_get_effect(res_obj, stat = "nap", interval = 0.95, return_draws = FALSE)
 \item{stat}{One of "mean", "median",
 "mean-diff", "median-diff",
 "log-mean-ratio", "log-median-ratio",
-"nap", "tau", or "pem"}
+"nap", "tau", "pem", or "hps_d"}
 
 \item{interval}{Some quantile interval between 0 and 1}
 
