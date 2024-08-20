@@ -48,7 +48,6 @@ ssrhom_get_effect <- function(
   stat_post <- as.data.frame(res_obj$model, stat_real)
 
   var_names <- colnames(stat_post)
-  new_var_names <- var_names
   case_label <- res_obj$stan_data_list$case_label
   if (stat %in% stat_list[1:2]) {
     case_id <- as.integer(
@@ -72,6 +71,8 @@ ssrhom_get_effect <- function(
       name <- var_names_split[[i]]
       paste0(stat, "[", case_label[case_id[i]], name[2])
     })
+  } else if (stat %in% stat_list[10]) {
+    new_var_names <- stat
   }
   colnames(stat_post) <- new_var_names
 

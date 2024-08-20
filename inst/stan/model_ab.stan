@@ -150,9 +150,7 @@ generated quantities {
   vector[n] y_sim;
   // vector[n] log_lik;
   array[n] int ord_sim;
-  real hps_dstat = treat_eff / sqrt(
-    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
-  );
+  real hps_dstat;
 
   coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
   coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
@@ -271,4 +269,8 @@ generated quantities {
     tau = -tau;
     pem = 1.0 - pem;
   }
+
+  hps_dstat = sum(mean_diff) / sqrt(
+    square(sigma_coefs[1]) + square(sigma_coefs[2]) * treat_var + 1.0
+  );
 }
