@@ -47,6 +47,8 @@ tasky_model <- ssrhom_model_ab(
   grouping = "phase", condition = "B",
   time = "time", outcome = "count", case = "person"
 )
+# how much autocorrelation?
+print(tasky_model$model, "ac")
 # for a list of available effect sizes:
 ssrhom_list_stats()
 # non-overlap of all pairs

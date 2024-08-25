@@ -49,13 +49,29 @@ tasky_model <- ssrhom_model_ab(
   grouping = "phase", condition = "B",
   time = "time", outcome = "count", case = "person"
 )
-#> Warning: There were 31 divergent transitions after warmup. See
+#> Warning: There were 25 divergent transitions after warmup. See
 #> https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 #> to find out why this is a problem and how to eliminate them.
 #> Warning: Examine the pairs() plot to diagnose sampling problems
 #> Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
 #> Running the chains for more iterations may help. See
 #> https://mc-stan.org/misc/warnings.html#bulk-ess
+```
+
+``` r
+# how much autocorrelation?
+print(tasky_model$model, "ac")
+#> Inference for Stan model: model_ab.
+#> 3 chains, each with iter=1500; warmup=750; thin=1; 
+#> post-warmup draws per chain=750, total post-warmup draws=2250.
+#> 
+#>     mean se_mean   sd  2.5%   25%   50%  75% 97.5% n_eff Rhat
+#> ac -0.05       0 0.17 -0.37 -0.16 -0.05 0.06  0.29  1331    1
+#> 
+#> Samples were drawn using NUTS(diag_e) at Sun Aug 25 08:18:26 2024.
+#> For each parameter, n_eff is a crude measure of effective sample size,
+#> and Rhat is the potential scale reduction factor on split chains (at 
+#> convergence, Rhat=1).
 ```
 
 ``` r
@@ -81,9 +97,9 @@ ssrhom_get_effect(tasky_model, stat = "nap")
 #> # A tibble: 3 × 8
 #>   variable       mean     sd  q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>         <dbl>  <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 nap[amber]    0.904 0.0412 0.802 0.965  1.00    1298.    1846.
-#> 2 nap[cara]     0.660 0.0928 0.473 0.826  1.00    2423.    2312.
-#> 3 nap[rebeccah] 0.910 0.0449 0.803 0.976  1.00    1855.    1894.
+#> 1 nap[amber]    0.899 0.0425 0.797 0.962  1.00    1445.    2050.
+#> 2 nap[cara]     0.665 0.0871 0.486 0.821  1.00    2398.    2047.
+#> 3 nap[rebeccah] 0.910 0.0530 0.773 0.985  1.00    2035.    1878.
 ```
 
 ``` r
@@ -92,7 +108,7 @@ ssrhom_get_effect(tasky_model, stat = "smd_p")
 #> # A tibble: 3 × 8
 #>   variable         mean    sd    q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>           <dbl> <dbl>   <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 smd_p[amber]    1.89  0.350  1.21    2.62  1.00    1545.    1830.
-#> 2 smd_p[cara]     0.614 0.386 -0.0945  1.40  1.00    2424.    2312.
-#> 3 smd_p[rebeccah] 2.11  0.496  1.24    3.26  1.00    1859.    1864.
+#> 1 smd_p[amber]    1.86  0.340  1.20    2.53  1.00    1707.    1694.
+#> 2 smd_p[cara]     0.645 0.367 -0.0333  1.38  1.00    2333.    1859.
+#> 3 smd_p[rebeccah] 2.15  0.578  1.10    3.44  1.00    2008.    2038.
 ```
