@@ -1,4 +1,3 @@
-// auto-generated ordinal regression with auto-correlation
 functions {
   matrix create_autoreg_mat (real corr, int time) {
     matrix[time, time] autoreg_mat = identity_matrix(time);
@@ -79,15 +78,19 @@ parameters {
   vector<upper = cutpoints[1]>[count_levs[1]] z_first;
   vector<lower = cutpoints[n_cuts]>[count_levs[n_ord]] z_last;
   vector<lower = 0.0, upper = 1.0>[count_others] z_inter;
+  real<lower = 0> sd_ratio_sig;
+  vector[n_case * 2 - 1] ln_sd_ratio;
 }
 model {
   cutpoints ~ student_t(3, 0, 1);
   sigma_te ~ student_t(3, 0, 1);
   treat_eff ~ normal(0, sigma_te);
-  phi_01 ~ beta(5, 5);
+  phi_01 ~ beta(2, 2);
 
   sigma_coefs ~ student_t(3, 0, 1);
   to_vector(coefs_base) ~ std_normal();
+  sd_ratio_sig ~ student_t(3, 0, 1);
+  ln_sd_ratio ~ normal(0, sd_ratio_sig);
 
   {
     matrix[n_case, n_time] mu;
@@ -102,6 +105,9 @@ model {
     coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
 
     for (i in 1:n_case) {
+      vector[n_time] case_sd_vec = rep_vector(0.0, n_time);
+      matrix[n_time, n_time] case_ar_mat;
+
       array[nm_count[i]] int row_idxs = true_idxs[i, 1:nm_count[i]];
 
       mu[i, ] = coefs[i, 1] + coefs[i, 2] * to_row_vector(treat_arr[i, ]);
@@ -124,11 +130,20 @@ model {
             target += log(abs(b_min_a));
           }
         }
+        if (i != 1 || treat_arr[i, j] != 0) {
+          case_sd_vec[j] = ln_sd_ratio[2 * i - 2 + treat_arr[i, j]];
+        }
       }
+      case_sd_vec = exp(case_sd_vec);
+
+      case_ar_mat[row_idxs, row_idxs] =
+        quad_form_diag(autoreg_mat[row_idxs, row_idxs],
+        case_sd_vec[row_idxs]
+      );
 
       z[i, row_idxs] ~ multi_normal_cholesky(
         mu[i, row_idxs],
-        cholesky_decompose(autoreg_mat[row_idxs, row_idxs])
+        cholesky_decompose(case_ar_mat[row_idxs, row_idxs])
       );
     }
   }
@@ -174,13 +189,28 @@ generated quantities {
 
     for (i in 1:n_case) {
       array[nm_count[i]] int row_idxs = true_idxs[i, 1:nm_count[i]];
+      vector[n_time] case_sd_vec = rep_vector(0.0, n_time);
+      matrix[n_time, n_time] case_ar_mat;
+
+      for (j in 1:n_time) {
+        if (i != 1 || treat_arr[i, j] != 0) {
+          case_sd_vec[j] = ln_sd_ratio[2 * i - 2 + treat_arr[i, j]];
+        }
+      }
+      case_sd_vec = exp(case_sd_vec);
+
+      case_ar_mat[row_idxs, row_idxs] =
+        quad_form_diag(autoreg_mat[row_idxs, row_idxs],
+        case_sd_vec[row_idxs]
+      );
 
       mu[i, ] = coefs[i, 1] + coefs[i, 2] * to_row_vector(treat_arr[i, ]);
 
       z[i, row_idxs] = multi_normal_cholesky_rng(
         mu[i, row_idxs],
-        cholesky_decompose(autoreg_mat[row_idxs, row_idxs])
+        cholesky_decompose(case_ar_mat[row_idxs, row_idxs])
       )';
+
       for (j in row_idxs) {
         if (z[i, j] < cutpoints[1]) {
           z_int[i, j] = 1;
@@ -197,10 +227,21 @@ generated quantities {
     }
 
     for (i in 1:n) {
+      real scaler = 0;
       ord_sim[i] = z_int[case_id[i], time_id[i]];
       y_sim[i] = y_s[ord_sim[i]];
       mat_col_id = (case_id[i] - 1) * 2 + treat[i] + 1;
-      p_prob = Phi(cutpoints - mu[case_id[i], time_id[i]]);
+
+      if (case_id[i] != 1 || treat[i] != 0) {
+        scaler = ln_sd_ratio[2 * case_id[i] - 2 + treat[i]];
+      }
+      scaler = exp(scaler);
+
+      p_prob = Phi(
+        (cutpoints - mu[case_id[i], time_id[i]]) /
+        scaler
+      );
+
       for (j in 1:n_cuts) {
         if (j == 1) {
           pmf_vec[j] = p_prob[j];
