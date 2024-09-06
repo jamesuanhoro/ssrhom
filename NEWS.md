@@ -1,3 +1,7 @@
+# ssrhom (development version)
+
+* Updated RMD
+
 # ssrhom 0.0.3
 
 * Model updates:

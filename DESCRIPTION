@@ -1,6 +1,6 @@
 Package: ssrhom
 Title: Hierarchical ordinal models for analyzing single subject designs
-Version: 0.0.3
+Version: 0.0.3.9000
 Authors@R: 
     person("James", "Uanhoro", , "James.Uanhoro@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4843-927X"))
