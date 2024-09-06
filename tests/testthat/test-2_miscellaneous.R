@@ -1,4 +1,4 @@
-n_stat <- 10
+n_stat <- 11
 
 test_that("Stat list works as expected", {
   stat_list <- ssrhom_list_stats(table = FALSE)

@@ -75,8 +75,9 @@ ssrhom_model_ab <- function(
     chains = chains, cores = cores,
     init = function() {
       list(
-        sigma_te = .5, sigma_coefs = rep(.5, 2), treat_eff = 0,
-        coefs_base = matrix(0, dl$n_case, 2), phi_01 = .5
+        sd_gamma = .5, sd_ln_lambda = .5,
+        sigma_coefs = rep(0.5, (dl$n_case > 1) * 2), treat_eff = 0,
+        coefs_base = matrix(0, (dl$n_case > 1) * dl$n_case, 2), phi_01 = .5
       )
     },
     seed = seed,
