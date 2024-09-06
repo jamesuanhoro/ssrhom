@@ -16,6 +16,14 @@ expect_error(suppressWarnings(fit_mod_1 <- ssrhom_model_ab(
   warmup = n_warm, sampling = n_sampling, chains = n_chains, cores = n_chains
 )), NA)
 
+tasky$out_2 <- as.integer(tasky$proportion > .5)
+expect_error(suppressWarnings(fit_mod_2 <- ssrhom_model_ab(
+  data = tasky,
+  grouping = "phase", condition = "B",
+  time = "time", outcome = "out_2", case = "person",
+  warmup = n_warm, sampling = n_sampling, chains = n_chains, cores = n_chains
+)), NA)
+
 test_that("Fail on wrong interval", {
   interval_fail_message <- paste(
     "interval", "is not a number between 0 and 1.",
@@ -27,15 +35,23 @@ test_that("Fail on wrong interval", {
     interval_fail_message
   )
   expect_error(
-    ssrhom_get_effect(fit_mod_1, interval = 1.45),
-    interval_fail_message
-  )
-  expect_error(
     ssrhom_get_effect(fit_mod, interval = "e"),
     interval_fail_message
   )
   expect_error(
+    ssrhom_get_effect(fit_mod_1, interval = 1.45),
+    interval_fail_message
+  )
+  expect_error(
     ssrhom_get_effect(fit_mod_1, interval = "e"),
+    interval_fail_message
+  )
+  expect_error(
+    ssrhom_get_effect(fit_mod_2, interval = 1.45),
+    interval_fail_message
+  )
+  expect_error(
+    ssrhom_get_effect(fit_mod_2, interval = "e"),
     interval_fail_message
   )
 })
@@ -62,6 +78,10 @@ test_that("Fail on invalid stat", {
   )
   expect_error(
     ssrhom_get_effect(fit_mod_1, stat = rand_stat()),
+    stat_fail_message
+  )
+  expect_error(
+    ssrhom_get_effect(fit_mod_2, stat = rand_stat()),
     stat_fail_message
   )
 })
@@ -146,6 +166,39 @@ test_that("Describe successes", {
         expect_true(nrow(output) == (fit_mod_1$stan_data_list$n_case * 2))
       } else {
         expect_true(nrow(output) == fit_mod_1$stan_data_list$n_case)
+      }
+    }
+
+    if (isTRUE(return_draws)) {
+      # should be data.frame not draws_summary
+      output <- ssrhom_get_effect(
+        fit_mod_2,
+        stat = stat, interval = rand_interval, return_draws = return_draws
+      )
+      expect_true(all(c(
+        any(class(output) == "data.frame"),
+        !any(class(output) == "draws_summary")
+      )))
+      expect_true(nrow(output) == n_sampling * n_chains)
+      if (isTRUE(stat_by_phase)) {
+        expect_true(ncol(output) == (fit_mod_2$stan_data_list$n_case * 2 + 3))
+      } else {
+        expect_true(ncol(output) == (fit_mod_2$stan_data_list$n_case + 3))
+      }
+      col_names <- colnames(output)
+      col_names <- col_names[seq_len(ncol(output) - 3)]
+      expect_true(all(grepl(stat, col_names)))
+    } else {
+      # should be draws_summary
+      suppressWarnings(output <- ssrhom_get_effect(
+        fit_mod_2,
+        stat = stat, interval = rand_interval, return_draws = return_draws
+      ))
+      expect_true(any(class(output) == "draws_summary"))
+      if (isTRUE(stat_by_phase)) {
+        expect_true(nrow(output) == (fit_mod_2$stan_data_list$n_case * 2))
+      } else {
+        expect_true(nrow(output) == fit_mod_2$stan_data_list$n_case)
       }
     }
   })
