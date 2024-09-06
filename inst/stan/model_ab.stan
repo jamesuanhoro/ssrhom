@@ -26,6 +26,8 @@ data {
   int n_count;
   vector[n_count] count;
   int<lower = 0, upper = 1> increase;
+  int spl_deg;
+  matrix[n_ord - 1, spl_deg] spl_mat;
 }
 transformed data {
   array[n_case, n_time] int outcome_ord = rep_array(0, n_case, n_time);
@@ -67,30 +69,44 @@ transformed data {
   int n_cuts = n_ord - 1;
   int n_ord_gt_2 = n_ord > 2 ? 1 : 0;
   int count_others = n_ord > 2 ? sum(count_levs[2:n_cuts]) : 0;
+
+  int gt_one_case = n_case == 1 ? 0 : 1;
+
+  int do_log = 0;
+  int do_lor = 0;
+  if (min(y_s) >= 0) {
+    do_log = 1;
+    if (max(y_s) <= 1) {
+      do_lor = 1;
+    }
+  }
 }
 parameters {
-  real<lower = 0> sigma_te;
-  vector<lower = 0>[2] sigma_coefs;
+  real intercept;
+  real<lower = 0> sd_gamma;
+  matrix<lower = 0>[spl_deg, 2] gamma;
+  vector<lower = 0>[2 * gt_one_case] sigma_coefs;
+  matrix[n_case * gt_one_case, 2] coefs_base;
   real treat_eff;
-  matrix[n_case, 2] coefs_base;
   real<lower = 0, upper = 1> phi_01;
-  ordered[n_cuts] cutpoints;
-  vector<upper = cutpoints[1]>[count_levs[1]] z_first;
-  vector<lower = cutpoints[n_cuts]>[count_levs[n_ord]] z_last;
+  vector<upper = 0.0>[count_levs[1]] z_first;
+  vector<lower = 0.0>[count_levs[n_ord]] z_last;
   vector<lower = 0.0, upper = 1.0>[count_others] z_inter;
-  real<lower = 0> sd_ratio_sig;
-  vector[n_case * 2 - 1] ln_sd_ratio;
 }
 model {
-  cutpoints ~ student_t(3, 0, 1);
-  sigma_te ~ student_t(3, 0, 1);
-  treat_eff ~ normal(0, sigma_te);
+  matrix[n_cuts, 2] cutpoints_mat;
+  cutpoints_mat[, 1] = intercept + spl_mat * gamma[, 1];
+  cutpoints_mat[, 2] = intercept + treat_eff + spl_mat * gamma[, 2];
+
+  intercept ~ normal(0, 5);
+  sd_gamma ~ std_normal();
+  to_vector((gamma)) ~ normal(0, sd_gamma);
+
+  treat_eff ~ normal(0, 2.5);
   phi_01 ~ beta(2, 2);
 
   sigma_coefs ~ student_t(3, 0, 1);
   to_vector(coefs_base) ~ std_normal();
-  sd_ratio_sig ~ student_t(3, 0, 1);
-  ln_sd_ratio ~ normal(0, sd_ratio_sig);
 
   {
     matrix[n_case, n_time] mu;
@@ -101,49 +117,43 @@ model {
     matrix[n_case, n_time] z;
     array[2 + n_ord_gt_2] int pos_levs = rep_array(0, 2 + n_ord_gt_2);
 
-    coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
-    coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
+    if (gt_one_case == 1) {
+      coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
+      coefs[, 2] = sigma_coefs[2] * coefs_base[, 2];
+    } else {
+      coefs[1, 1] = 0.0;
+      coefs[1, 2] = 0.0;
+    }
 
     for (i in 1:n_case) {
-      vector[n_time] case_sd_vec = rep_vector(0.0, n_time);
-      matrix[n_time, n_time] case_ar_mat;
-
       array[nm_count[i]] int row_idxs = true_idxs[i, 1:nm_count[i]];
 
       mu[i, ] = coefs[i, 1] + coefs[i, 2] * to_row_vector(treat_arr[i, ]);
 
       for (j in 1:n_time) {
         int curr_idx = outcome_ord[i, j];
+        int c_j = treat_arr[i, j] + 1;
         if (curr_idx == 1) {
           pos_levs[1] += 1;
-          z[i, j] = z_first[pos_levs[1]];
+          z[i, j] = z_first[pos_levs[1]] + cutpoints_mat[1, c_j];
         } else if (curr_idx > 0) {
           if (curr_idx == n_ord) {
             pos_levs[2] += 1;
-            z[i, j] = z_last[pos_levs[2]];
+            z[i, j] = z_last[pos_levs[2]] + cutpoints_mat[n_cuts, c_j];
           } else {
-            real b_min_a = cutpoints[curr_idx] - cutpoints[curr_idx - 1];
+            real b_min_a = cutpoints_mat[curr_idx, c_j] - cutpoints_mat[curr_idx - 1, c_j];
             // rescale 0-1 to cutpoints scale
             pos_levs[3] += 1;
-            z[i, j] = b_min_a * z_inter[pos_levs[3]] + cutpoints[curr_idx - 1];
+            z[i, j] = b_min_a * z_inter[pos_levs[3]] + cutpoints_mat[curr_idx - 1, c_j];
             // jacobian adjustment
             target += log(abs(b_min_a));
           }
         }
-        if (i != 1 || treat_arr[i, j] != 0) {
-          case_sd_vec[j] = ln_sd_ratio[2 * i - 2 + treat_arr[i, j]];
-        }
       }
-      case_sd_vec = exp(case_sd_vec);
-
-      case_ar_mat[row_idxs, row_idxs] =
-        quad_form_diag(autoreg_mat[row_idxs, row_idxs],
-        case_sd_vec[row_idxs]
-      );
 
       z[i, row_idxs] ~ multi_normal_cholesky(
         mu[i, row_idxs],
-        cholesky_decompose(case_ar_mat[row_idxs, row_idxs])
+        cholesky_decompose(autoreg_mat[row_idxs, row_idxs])
       );
     }
   }
@@ -156,7 +166,8 @@ generated quantities {
   matrix[n_case, 2] median_s;
   vector[n_case] mean_diff;
   vector[n_case] median_diff;
-  vector[n_case] log_mean_ratio;
+  vector[n_case * do_log] log_mean_ratio;
+  vector[n_case * do_lor] log_odds_ratio;
   vector[n_case] nap;
   vector[n_case] tau;
   vector[n_case] pem;
@@ -166,9 +177,18 @@ generated quantities {
   vector[n] y_sim;
   // vector[n] log_lik;
   array[n] int ord_sim;
+  matrix[n_cuts, 2] cutpoints_mat;
 
-  coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
-  coefs[, 2] = treat_eff + sigma_coefs[2] * coefs_base[, 2];
+  cutpoints_mat[, 1] = intercept + spl_mat * gamma[, 1];
+  cutpoints_mat[, 2] = intercept + treat_eff + spl_mat * gamma[, 2];
+
+  if (gt_one_case == 1) {
+    coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
+    coefs[, 2] = sigma_coefs[2] * coefs_base[, 2];
+  } else {
+    coefs[1, 1] = 0.0;
+    coefs[1, 2] = 0.0;
+  }
 
   {
     matrix[n_case, n_time] mu;
@@ -189,36 +209,23 @@ generated quantities {
 
     for (i in 1:n_case) {
       array[nm_count[i]] int row_idxs = true_idxs[i, 1:nm_count[i]];
-      vector[n_time] case_sd_vec = rep_vector(0.0, n_time);
-      matrix[n_time, n_time] case_ar_mat;
-
-      for (j in 1:n_time) {
-        if (i != 1 || treat_arr[i, j] != 0) {
-          case_sd_vec[j] = ln_sd_ratio[2 * i - 2 + treat_arr[i, j]];
-        }
-      }
-      case_sd_vec = exp(case_sd_vec);
-
-      case_ar_mat[row_idxs, row_idxs] =
-        quad_form_diag(autoreg_mat[row_idxs, row_idxs],
-        case_sd_vec[row_idxs]
-      );
 
       mu[i, ] = coefs[i, 1] + coefs[i, 2] * to_row_vector(treat_arr[i, ]);
 
       z[i, row_idxs] = multi_normal_cholesky_rng(
         mu[i, row_idxs],
-        cholesky_decompose(case_ar_mat[row_idxs, row_idxs])
+        cholesky_decompose(autoreg_mat[row_idxs, row_idxs])
       )';
 
       for (j in row_idxs) {
-        if (z[i, j] < cutpoints[1]) {
+        int c_j = treat_arr[i, j] + 1;
+        if (z[i, j] < cutpoints_mat[1, c_j]) {
           z_int[i, j] = 1;
-        } else if (z[i, j] > cutpoints[n_cuts]) {
+        } else if (z[i, j] > cutpoints_mat[n_cuts, c_j]) {
           z_int[i, j] = n_ord;
         } else {
           for (k in 2:n_cuts) {
-            if (z[i, j] > cutpoints[k - 1] && z[i, j] < cutpoints[k]) {
+            if (z[i, j] > cutpoints_mat[k - 1, c_j] && z[i, j] < cutpoints_mat[k, c_j]) {
               z_int[i, j] = k;
             }
           }
@@ -227,20 +234,11 @@ generated quantities {
     }
 
     for (i in 1:n) {
-      real scaler = 0;
       ord_sim[i] = z_int[case_id[i], time_id[i]];
       y_sim[i] = y_s[ord_sim[i]];
       mat_col_id = (case_id[i] - 1) * 2 + treat[i] + 1;
 
-      if (case_id[i] != 1 || treat[i] != 0) {
-        scaler = ln_sd_ratio[2 * case_id[i] - 2 + treat[i]];
-      }
-      scaler = exp(scaler);
-
-      p_prob = Phi(
-        (cutpoints - mu[case_id[i], time_id[i]]) /
-        scaler
-      );
+      p_prob = Phi(cutpoints_mat[, treat[i] + 1] - mu[case_id[i], time_id[i]]);
 
       for (j in 1:n_cuts) {
         if (j == 1) {
@@ -275,15 +273,15 @@ generated quantities {
             if (cdf[k] == .5) {
               median_s[i, j] = y_s[k];
             } else if (cdf[k - 1] < .5 && cdf[k] > .5) {
-              median_s[i, j] = y_s[k - 1] + (.5 - cdf[k - 1]) *
-                (y_s[k] - y_s[k - 1]) / (cdf[k] - cdf[k - 1]);
+              median_s[i, j] = y_s[k];
             }
           }
         }
       }
       mean_diff[i] = mean_s[i, 2] - mean_s[i, 1];
       median_diff[i] = median_s[i, 2] - median_s[i, 1];
-      log_mean_ratio[i] = log(mean_s[i, 2]) - log(mean_s[i, 1]);
+      if (do_log == 1) log_mean_ratio[i] = log(mean_s[i, 2]) - log(mean_s[i, 1]);
+      if (do_lor == 1) log_odds_ratio[i] = log_mean_ratio[i] - log1m(mean_s[i, 2]) + log1m(mean_s[i, 1]);
       smd_c[i] = mean_diff[i] / sqrt(var_s[i, 1]);
       smd_p[i] = mean_diff[i] / sqrt((
         (count[col_id - 1] - 1) * var_s[i, 1] +
@@ -310,7 +308,8 @@ generated quantities {
   if (increase == 0) {
     mean_diff = -mean_diff;
     median_diff = -median_diff;
-    log_mean_ratio = -log_mean_ratio;
+    if (do_log == 1) log_mean_ratio = -log_mean_ratio;
+    if (do_lor == 1) log_odds_ratio = -log_odds_ratio;
     nap = 1.0 - nap;
     tau = -tau;
     pem = 1.0 - pem;

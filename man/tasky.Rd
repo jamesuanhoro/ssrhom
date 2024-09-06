@@ -7,11 +7,12 @@
 \format{
 \subsection{\code{tasky}}{
 
-A data frame with 70 rows and 3 colums:
+A data frame with 70 rows and 5 colums:
 \describe{
 \item{person}{The case label}
 \item{phase}{Intervention phase where "B" is treatment}
 \item{count}{The count of on-task intervals out of 6}
+\item{proportion}{The count as a proportion}
 \item{time}{Session number}
 }
 }

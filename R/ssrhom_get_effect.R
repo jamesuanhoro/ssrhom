@@ -1,10 +1,15 @@
 #' Report an effect of interest
 #'
 #' @param res_obj Object returned by main function
-#' @param stat One of "mean", "median",
-#' "mean-diff", "median-diff",
-#' "log-mean-ratio",
-#' "nap", "tau", "pem", "smd_c", or "smd_p"
+#' @param stat One of \code{"mean"}, \code{"median"},
+#' \code{"mean-diff"}, \code{"median-diff"},
+#' \code{"lrr"}, \code{"lor"},
+#' \code{"nap"}, \code{"tau"}, \code{"pem"}, \code{"smd_c"},
+#' or \code{"smd_p"}.
+#' `lrr` or log rate ratio is only computed when the outcome variable is
+#' non-negative or has a minimum greater than 0.
+#' `lor` or log odds ratio is only computed when the outcome variable falls
+#' entirely in the 0-1 interval, inclusive of both 0 and 1.
 #' @param interval Some quantile interval between 0 and 1
 #' @param return_draws If TRUE, do not summarize the posterior samples.
 #' If FALSE, summarize the posterior samples.
@@ -17,6 +22,7 @@ ssrhom_get_effect <- function(
     "mean_s", "median_s",
     "mean_diff", "median_diff",
     "log_mean_ratio",
+    "log_odds_ratio",
     "nap", "tau", "pem", "smd_c", "smd_p"
   )
 
@@ -57,7 +63,7 @@ ssrhom_get_effect <- function(
         c("Control", "Treatment")[which_pos], "]"
       )
     })
-  } else if (stat %in% stat_list[3:10]) {
+  } else if (stat %in% stat_list[3:11]) {
     case_id <- as.integer(
       regmatches(var_names, regexpr("\\d+", var_names))
     )

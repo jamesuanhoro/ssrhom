@@ -94,14 +94,6 @@ generic_data_checks <- function(
   dt$case_label <- factor(dt[, case])
   dt$case_id <- as.integer(dt$case_label)
 
-  if (max(dt$case_id) == 1) {
-    statement <- paste(
-      "There should be data from more than one case for analysis.",
-      sep = "\n"
-    )
-    stop(statement)
-  }
-
   tryCatch(
     sapply(dt[, time], is_positive_whole_number),
     error = function(e) {
@@ -155,6 +147,34 @@ generic_numeric_checks <- function(dt, outcome) {
   return(NULL)
 }
 
+#' Create data list splines
+#' @return Spline matrix
+#' @param dl Stan data list
+#' @keywords internal
+create_spl_mat <- function(dl) {
+  n_cuts <- dl$n_ord - 1
+  if (dl$n_ord == 2) {
+    dl$spl_mat <- matrix(nrow = n_cuts, ncol = 0)
+  } else if (dl$n_ord <= 10) {
+    dl$spl_mat <- -.5 + splines2::iSpline(
+      seq_len(n_cuts),
+      df = n_cuts, degree = 0, intercept = TRUE
+    )
+  } else if (dl$n_ord <= 20) {
+    dl$spl_mat <- -.5 + splines2::iSpline(
+      seq_len(n_cuts),
+      df = dl$n_ord - 3, degree = 2, intercept = TRUE
+    )
+  } else if (dl$n_ord > 20) {
+    dl$spl_mat <- -.5 + splines2::iSpline(
+      seq_len(n_cuts),
+      df = 15 + 2 + 1, degree = 2, intercept = TRUE
+    )
+  }
+  dl$spl_deg <- ncol(dl$spl_mat)
+  return(dl)
+}
+
 #' Create Stan data list object
 #' @return Data list object for Stan
 #' @param dt Modified form of original data
@@ -185,6 +205,9 @@ create_dat_list <- function(dt, increase = TRUE) {
   dl$n_count <- nrow(gm_count) # number of case-phases
   dl$count <- gm_count$out # number of data points computed in gm_count
   dl$increase <- as.integer(!isFALSE(increase))
+
+  dl <- create_spl_mat(dl)
+
   return(dl)
 }
 
@@ -235,7 +258,7 @@ ssrhom_list_stats <- function(table = TRUE) {
   stats <- c(
     "mean", "median",
     "mean-diff", "median-diff",
-    "log-mean-ratio",
+    "lrr", "lor",
     "nap", "tau", "pem", "smd_c", "smd_p"
   )
   if (isFALSE(table)) {
@@ -246,7 +269,8 @@ ssrhom_list_stats <- function(table = TRUE) {
     "median of each case in both phases",
     "mean difference between phases by case",
     "median difference between phases by case",
-    "log-ratio of means by case",
+    "log-ratio of means by case when data are never negative",
+    "log-ratio of odds by case when data fall between 0 and 1 inclusive",
     "non-overlap of all pairs by case",
     "A linear transformation of NAP",
     "Proportion of treatment cases exceeding control cases by case",

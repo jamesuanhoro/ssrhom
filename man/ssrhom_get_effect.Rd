@@ -9,10 +9,15 @@ ssrhom_get_effect(res_obj, stat = "nap", interval = 0.95, return_draws = FALSE)
 \arguments{
 \item{res_obj}{Object returned by main function}
 
-\item{stat}{One of "mean", "median",
-"mean-diff", "median-diff",
-"log-mean-ratio",
-"nap", "tau", "pem", "smd_c", or "smd_p"}
+\item{stat}{One of \code{"mean"}, \code{"median"},
+\code{"mean-diff"}, \code{"median-diff"},
+\code{"lrr"}, \code{"lor"},
+\code{"nap"}, \code{"tau"}, \code{"pem"}, \code{"smd_c"},
+or \code{"smd_p"}.
+\code{lrr} or log rate ratio is only computed when the outcome variable is
+non-negative or has a minimum greater than 0.
+\code{lor} or log odds ratio is only computed when the outcome variable falls
+entirely in the 0-1 interval, inclusive of both 0 and 1.}
 
 \item{interval}{Some quantile interval between 0 and 1}
 

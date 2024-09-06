@@ -90,18 +90,6 @@ test_that("When all data are control cases", {
   ))
 })
 
-test_that("More than one person", {
-  expect_error(ssrhom_model_ab(
-    data = tasky,
-    grouping = "phase", condition = "B",
-    time = "time", outcome = "count", case = "one_person",
-    warmup = 250, sampling = 250, chains = 3, cores = 3
-  ), paste(
-    "There should be data from more than one case for analysis.",
-    sep = "\n"
-  ))
-})
-
 test_that("All positive time", {
   expect_error(ssrhom_model_ab(
     data = tasky,
