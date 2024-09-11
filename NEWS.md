@@ -1,6 +1,7 @@
 # ssrhom (development version)
 
 * Updated RMD
+* Posterior location is now median not mean
 
 # ssrhom 0.0.3
 
