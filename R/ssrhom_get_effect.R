@@ -87,7 +87,7 @@ ssrhom_get_effect <- function(
   stat_post_draws <- posterior::as_draws(stat_post)
   result <- posterior::summarise_draws(
     stat_post_draws,
-    mean,
+    median = stats::median,
     sd = stats::sd,
     ~ posterior::quantile2(.x, probs = c(lower_lim, 1 - lower_lim)),
     posterior::default_convergence_measures()
