@@ -259,7 +259,7 @@ ssrhom_list_stats <- function(table = TRUE) {
     "mean", "median",
     "mean-diff", "median-diff",
     "lrr", "lor",
-    "nap", "tau", "pem", "smd_c", "smd_p"
+    "nap", "tau", "pem", "smd-c", "smd-p"
   )
   if (isFALSE(table)) {
     return(stats)

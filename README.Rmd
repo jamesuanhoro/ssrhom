@@ -54,5 +54,5 @@ ssrhom_list_stats()
 # non-overlap of all pairs
 ssrhom_get_effect(tasky_model, stat = "nap")
 # within subject standardized mean difference using pooled SD
-ssrhom_get_effect(tasky_model, stat = "smd_p")
+ssrhom_get_effect(tasky_model, stat = "smd-p")
 ```
