@@ -49,7 +49,7 @@ tasky_model <- ssrhom_model_ab(
   grouping = "phase", condition = "B",
   time = "time", outcome = "count", case = "person"
 )
-#> Warning: There were 2 divergent transitions after warmup. See
+#> Warning: There were 5 divergent transitions after warmup. See
 #> https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 #> to find out why this is a problem and how to eliminate them.
 #> Warning: Examine the pairs() plot to diagnose sampling problems
@@ -66,9 +66,9 @@ print(tasky_model$model, "ac")
 #> post-warmup draws per chain=750, total post-warmup draws=2250.
 #> 
 #>     mean se_mean   sd  2.5%   25%   50%  75% 97.5% n_eff Rhat
-#> ac -0.05       0 0.18 -0.39 -0.17 -0.06 0.06   0.3  1699    1
+#> ac -0.05    0.01 0.18 -0.39 -0.17 -0.06 0.07  0.32  1166    1
 #> 
-#> Samples were drawn using NUTS(diag_e) at Wed Sep 11 13:03:27 2024.
+#> Samples were drawn using NUTS(diag_e) at Tue Sep 17 08:40:58 2024.
 #> For each parameter, n_eff is a crude measure of effective sample size,
 #> and Rhat is the potential scale reduction factor on split chains (at 
 #> convergence, Rhat=1).
@@ -86,8 +86,8 @@ ssrhom_list_stats()
 #> nap                 :    non-overlap of all pairs by case
 #> tau                 :    A linear transformation of NAP
 #> pem                 :    Proportion of treatment cases exceeding control cases by case
-#> smd_c               :    Standardized mean difference using control SD as standardizer by case
-#> smd_p               :    Standardized mean difference using pooled SD as standardizer by case
+#> smd-c               :    Standardized mean difference using control SD as standardizer by case
+#> smd-p               :    Standardized mean difference using pooled SD as standardizer by case
 #> 
 #> If model was called with `increase = FALSE`, then effects are reversed.
 ```
@@ -98,18 +98,18 @@ ssrhom_get_effect(tasky_model, stat = "nap")
 #> # A tibble: 3 × 8
 #>   variable      median     sd  q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>          <dbl>  <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 nap[amber]     0.898 0.0422 0.797 0.958  1.00    2162.    1920.
-#> 2 nap[cara]      0.691 0.0889 0.500 0.846  1.00    2261.    1755.
-#> 3 nap[rebeccah]  0.912 0.0438 0.804 0.972  1.00    2071.    2081.
+#> 1 nap[amber]     0.896 0.0425 0.797 0.961  1.00    2269.    2049.
+#> 2 nap[cara]      0.691 0.0882 0.504 0.843  1.00    2532.    2092.
+#> 3 nap[rebeccah]  0.910 0.0442 0.801 0.976  1.00    1789.    1847.
 ```
 
 ``` r
 # within subject standardized mean difference using pooled SD
-ssrhom_get_effect(tasky_model, stat = "smd_p")
+ssrhom_get_effect(tasky_model, stat = "smd-p")
 #> # A tibble: 3 × 8
 #>   variable        median    sd   q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>            <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 smd_p[amber]     1.89  0.364 1.25    2.68  1.00    2145.    1824.
-#> 2 smd_p[cara]      0.756 0.394 0.0290  1.58  1.00    2227.    1738.
-#> 3 smd_p[rebeccah]  2.14  0.530 1.36    3.40  1.00    2054.    2159.
+#> 1 smd-p[amber]     1.87  0.372 1.25    2.71 0.999    2349.    2124.
+#> 2 smd-p[cara]      0.748 0.391 0.0386  1.57 1.00     2464.    2129.
+#> 3 smd-p[rebeccah]  2.15  0.542 1.33    3.47 1.00     1970.    1797.
 ```

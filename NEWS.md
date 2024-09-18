@@ -2,6 +2,7 @@
 
 * Updated RMD
 * Posterior location is now median not mean
+* Changed standardized mean differences names
 
 # ssrhom 0.0.3
 
