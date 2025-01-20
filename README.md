@@ -11,10 +11,16 @@ hierarchical ordinal regression models.
 
 ## Installation
 
-You can install ssrhom with:
+This process is modified for anonymization purposes.
+
+Download the package source files from:
+<https://osf.io/download/eqnsp/?view_only=6866926dc56145c38b5559d51f8fc432>
+
+Once the source files are in your working directory, you can install the
+package with:
 
 ``` r
-remotes::install_url("https://anonymous.4open.science/r/ssrhom-10ED")
+install.packages("./ssrhom_0.0.3.9002.tar.gz", type = "source")
 ```
 
 ## Simple demonstration
@@ -37,16 +43,13 @@ tasky_model <- ssrhom_model_ab(
   grouping = "phase", condition = "B",
   time = "time", outcome = "count", case = "person"
 )
-#> Warning: There were 29 divergent transitions after warmup. See
+#> Warning: There were 2 divergent transitions after warmup. See
 #> https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
 #> to find out why this is a problem and how to eliminate them.
 #> Warning: Examine the pairs() plot to diagnose sampling problems
 #> Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
 #> Running the chains for more iterations may help. See
 #> https://mc-stan.org/misc/warnings.html#bulk-ess
-#> Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
-#> Running the chains for more iterations may help. See
-#> https://mc-stan.org/misc/warnings.html#tail-ess
 ```
 
 ``` r
@@ -57,9 +60,9 @@ print(tasky_model$model, "ac")
 #> post-warmup draws per chain=750, total post-warmup draws=2250.
 #> 
 #>     mean se_mean   sd 2.5%   25%   50%  75% 97.5% n_eff Rhat
-#> ac -0.06    0.01 0.18 -0.4 -0.19 -0.06 0.07   0.3   866    1
+#> ac -0.05    0.01 0.18 -0.4 -0.18 -0.05 0.08  0.31  1266 1.01
 #> 
-#> Samples were drawn using NUTS(diag_e) at Mon Jan 20 13:54:39 2025.
+#> Samples were drawn using NUTS(diag_e) at Mon Jan 20 14:22:45 2025.
 #> For each parameter, n_eff is a crude measure of effective sample size,
 #> and Rhat is the potential scale reduction factor on split chains (at 
 #> convergence, Rhat=1).
@@ -83,15 +86,15 @@ ssrhom_get_effect(tasky_model, stat = "nap")
 #> # A tibble: 3 × 8
 #>   variable      median     sd  q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>          <dbl>  <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 nap[amber]     0.899 0.0439 0.792 0.962  1.00    2062.    1868.
-#> 2 nap[cara]      0.687 0.0885 0.500 0.848  1.00    2429.    2203.
-#> 3 nap[rebeccah]  0.911 0.0426 0.811 0.973  1.00    1894.    1853.
+#> 1 nap[amber]     0.898 0.0437 0.787 0.958  1.00    2087.    1883.
+#> 2 nap[cara]      0.689 0.0886 0.502 0.841  1.00    1958.    1706.
+#> 3 nap[rebeccah]  0.910 0.0451 0.802 0.975  1.00    1832.    1755.
 # within subject standardized mean difference using pooled SD
 ssrhom_get_effect(tasky_model, stat = "smd-p")
 #> # A tibble: 3 × 8
 #>   variable        median    sd   q2.5 q97.5  rhat ess_bulk ess_tail
 #>   <chr>            <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#> 1 smd-p[amber]     1.90  0.376 1.24    2.77  1.00    2138.    2044.
-#> 2 smd-p[cara]      0.741 0.395 0.0244  1.59  1.00    2392.    2030.
-#> 3 smd-p[rebeccah]  2.14  0.517 1.39    3.46  1.00    1967.    1945.
+#> 1 smd-p[amber]     1.89  0.356 1.23    2.64  1.00    2078.    1855.
+#> 2 smd-p[cara]      0.749 0.393 0.0219  1.54  1.00    2023.    1646.
+#> 3 smd-p[rebeccah]  2.11  0.537 1.33    3.41  1.00    1792.    1668.
 ```

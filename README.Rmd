@@ -22,10 +22,14 @@ The goal of ssrhom is to analyze data from single subject designs using hierarch
 
 ## Installation
 
-You can install ssrhom with:
+This process is modified for anonymization purposes.
+
+Download the package source files from: <https://osf.io/download/eqnsp/?view_only=6866926dc56145c38b5559d51f8fc432>
+
+Once the source files are in your working directory, you can install the package with:
 
 ```{r eval = FALSE}
-remotes::install_url("https://anonymous.4open.science/r/ssrhom-10ED")
+install.packages("./ssrhom_0.0.3.9002.tar.gz", type = "source")
 ```
 
 ## Simple demonstration
