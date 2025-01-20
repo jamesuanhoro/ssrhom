@@ -2,8 +2,8 @@ Package: ssrhom
 Title: Hierarchical ordinal models for analyzing single subject designs
 Version: 0.0.3.9002
 Authors@R: 
-    person("James", "Uanhoro", , "James.Uanhoro@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-4843-927X"))
+    person("Masked", "Author", , "Masked.Author@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0000-0000-0000"))
 Description: Hierarchical ordinal models for analyzing single subject
     designs using Bayesian models fit with Stan.
 License: GPL (>= 3)

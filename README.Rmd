@@ -16,22 +16,16 @@ knitr::opts_chunk$set(
 # ssrhom
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/jamesuanhoro/ssrhom/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jamesuanhoro/ssrhom/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/jamesuanhoro/ssrhom/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jamesuanhoro/ssrhom?branch=main)
-[![R-universe badge](https://jamesuanhoro.r-universe.dev/badges/ssrhom)](https://jamesuanhoro.r-universe.dev/ssrhom)
 <!-- badges: end -->
 
 The goal of ssrhom is to analyze data from single subject designs using hierarchical ordinal regression models.
 
 ## Installation
 
-You can install ssrhom from [R-universe](https://r-universe.dev/) with:
+You can install ssrhom with:
 
 ```{r eval = FALSE}
-install.packages(
-  "ssrhom",
-  repos = c("https://jamesuanhoro.r-universe.dev", "https://cloud.r-project.org")
-)
+remotes::install_url("https://anonymous.4open.science/r/ssrhom-10ED")
 ```
 
 ## Simple demonstration
@@ -47,6 +41,9 @@ tasky_model <- ssrhom_model_ab(
   grouping = "phase", condition = "B",
   time = "time", outcome = "count", case = "person"
 )
+```
+
+```{r}
 # how much autocorrelation?
 print(tasky_model$model, "ac")
 # for a list of available effect sizes:
