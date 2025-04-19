@@ -95,8 +95,8 @@ parameters {
 }
 model {
   matrix[n_cuts, 2] cutpoints_mat;
-  cutpoints_mat[, 1] = intercept + spl_mat * gamma[, 1];
-  cutpoints_mat[, 2] = intercept + treat_eff + spl_mat * gamma[, 2];
+  cutpoints_mat[, 1] = -intercept + spl_mat * gamma[, 1];
+  cutpoints_mat[, 2] = -(intercept + treat_eff) + spl_mat * gamma[, 2];
 
   intercept ~ normal(0, 5);
   sd_gamma ~ std_normal();
@@ -179,8 +179,8 @@ generated quantities {
   array[n] int ord_sim;
   matrix[n_cuts, 2] cutpoints_mat;
 
-  cutpoints_mat[, 1] = intercept + spl_mat * gamma[, 1];
-  cutpoints_mat[, 2] = intercept + treat_eff + spl_mat * gamma[, 2];
+  cutpoints_mat[, 1] = -intercept + spl_mat * gamma[, 1];
+  cutpoints_mat[, 2] = -(intercept + treat_eff) + spl_mat * gamma[, 2];
 
   if (gt_one_case == 1) {
     coefs[, 1] = sigma_coefs[1] * coefs_base[, 1];
