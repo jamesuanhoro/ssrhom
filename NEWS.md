@@ -3,6 +3,7 @@
 * Updated RMD
 * Posterior location is now median not mean
 * Changed standardized mean differences names
+* Sign-rotated average intercept and treatment effect in model, so higher values of treatment effect match an increase in the outcome.
 
 # ssrhom 0.0.3
 
